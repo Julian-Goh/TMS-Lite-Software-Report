@@ -1,0 +1,28 @@
+TMS-Lite-Software-Report
+
+1.0.X: First release of Report Tool
+1.1.X: Changes to software save 
+(e.g. file & folder names standardization, folder directory, custom save)
+Update to Report GUI Tool (e.g. introduce widget(s) for img text(s) inclusion)
+
+#########################################################################
+Update 1.0.2
+1. Added a widget button for user to open web resources/document
+2. Improved text entry with undo & redo feature. User can now undo with Ctrl + Z and redo with Ctrl + Y.
+3. Improved edit tracker feature. Changes to text entry or image upload box, will trigger visual indicator (blinking yellow button) to alert user to generate/update report to save new edits.
+4. Minor bug fixes.
+
+Update 1.0.3
+1. Updated software User Interface(UI). User can now open Additional Resources (.pdf) document via the software.
+2. Added ‘Setup Image’ category for user to add image(s) in the Excel Report.
+3. ‘Grayscale Image’ category during Report Generation will have image text description.
+4. Bug fix: ‘Generate Report’ & ‘Update Report’ button will stop flashing/blinking when generating process is running.
+
+Update 1.1.0
+1. Previous version bug fixes. 
+2. Added feature for user to add image text(s)/description(s) to the generated report.
+3. Added ‘Background’ label for Report Generation.
+
+Update 1.1.1
+1. Added button for user to open save folder (TMS_Saved_Reports) directly from the software.
+2. Changes and update to the ‘New Report’ button in Report Tool. Feedback request: To provide user the option to clear all existing data on the UI to start a New Report.
