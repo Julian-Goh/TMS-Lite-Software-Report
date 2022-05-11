@@ -2,8 +2,9 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "TMS-Lite Software (Report)"
-#define NewShortcutName "TMS-Lite Software (Report) v.1.2.0"
-#define MyAppVersion "1.2.0"
+#define NewShortcutName "TMS-Lite Software (Report) v.1.1.0"
+#define OldShortcutName "TMS-Lite Software (Report) v.1.0.3"
+#define MyAppVersion "1.1.0"
 #define MyAppPublisher "TMS-Lite Sdn Bhd"
 #define MyAppExeName "TMS-Lite Software (Report).exe"
 #define MySourcePath "C:\Users\User\Downloads\TMS Lite_LC18 Library\TMS_Lite_Software_Python (Report)\dist\TMS-Lite Software (Report) v.1.1.0"
@@ -47,14 +48,8 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#NewShortcutName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [InstallDelete]
-Type: files; Name: "{userdesktop}\TMS-Lite Software (Report) v.1.0.3.lnk"
-Type: files; Name: "{commondesktop}\TMS-Lite Software (Report) v.1.0.3.lnk"
-
-Type: files; Name: "{userdesktop}\TMS-Lite Software (Report) v.1.1.0.lnk"
-Type: files; Name: "{commondesktop}\TMS-Lite Software (Report) v.1.1.0.lnk"
-
-Type: files; Name: "{userdesktop}\TMS-Lite Software (Report) v.1.1.1.lnk"
-Type: files; Name: "{commondesktop}\TMS-Lite Software (Report) v.1.1.1.lnk"
+Type: files; Name: "{userdesktop}\{#OldShortcutName}.lnk"
+Type: files; Name: "{commondesktop}\{#OldShortcutName}.lnk"
 
 [Code]
 function GetUninstallString: string;
