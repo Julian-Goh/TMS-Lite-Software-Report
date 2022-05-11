@@ -6,7 +6,7 @@
 #define MyAppVersion "1.2.0"
 #define MyAppPublisher "TMS-Lite Sdn Bhd"
 #define MyAppExeName "TMS-Lite Software (Report).exe"
-#define MySourcePath "C:\Users\User\Downloads\TMS Lite_LC18 Library\TMS_Lite_Software_Python (Report)\dist\TMS-Lite Software (Report) v.1.1.0"
+#define MySourcePath "C:\Users\User\Documents\GitHub\TMS-Lite-Software-Report\dist\TMS-Lite Software (Report) v.1.2.0"
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -22,7 +22,7 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=C:\Users\User\Downloads\TMS Lite_LC18 Library\TMS_Lite_Software_Python (Report)\Inno Setup Installer exe
+OutputDir=C:\Users\User\Documents\GitHub\TMS-Lite-Software-Report\Inno Setup Installer exe
 OutputBaseFilename={#MyAppName} v.{#MyAppVersion} Installer
 ;SetupIconFile={#MySourcePath}\TMS Icon\logo4.ico
 Compression=lzma
