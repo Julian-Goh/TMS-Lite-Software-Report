@@ -6,7 +6,7 @@ spec_root = os.path.abspath(SPECPATH)
 
 block_cipher = None
 
-version_str = ' v.' + '1.1.1'
+version_str = ' v.' + '1.2.0'
 
 def include_dir(mydir):
     def rec_glob(p, files):
@@ -23,7 +23,11 @@ def include_dir(mydir):
 
     return extra_data
 
-folder_list = ['Tk_MsgBox', 'TMS Icon', 'TMS_Web_Resources', 'report src', 'Font']
+folder_list = ['Tk_MsgBox', 'TMS Icon', 'TMS_Web_Resources', 'report src', 'Font'
+, 'Report_Module'
+, 'WebSrc_Module'
+, 'Tk_Custom_Widget'
+, 'misc_module']
 
 
 def include_file(file_path):
@@ -39,10 +43,10 @@ def include_file(file_path):
 file_list = []
 
 a = Analysis(['TMS_Lite_Software (Report).py'],
-             pathex=['C:\\Users\\User\\Downloads\\TMS Lite_LC18 Library\\TMS_Lite_Software_Python (Report)'],
+             pathex=[spec_root],
              binaries=[],
              datas=[],
-             hiddenimports=[],
+             hiddenimports=['fontTools.ttLib'],
              hookspath=[],
              runtime_hooks=[],
              excludes=[],
