@@ -30,6 +30,8 @@ from openpyxl.drawing.xdr import XDRPositiveSize2D
 from openpyxl.drawing.spreadsheet_drawing import OneCellAnchor, AnchorMarker
 from openpyxl.utils.units import pixels_to_EMU, cm_to_EMU
 
+from misc_module.os_create_folder import create_save_folder
+
 p2e = pixels_to_EMU
 c2e = cm_to_EMU
 
@@ -43,32 +45,6 @@ for i in range(0, 26):
 
 del curr_char
 
-def create_save_folder(folder_dir = os.path.join(os.environ['USERPROFILE'],  "TMS_Temp_Save"), duplicate = False):
-    if duplicate == True:
-        if path.exists(folder_dir):
-            index = 0
-            loop = True
-            while loop == True:
-                new_dir = folder_dir + '({})'.format(index)
-                if path.exists(new_dir):
-                    index = index + 1
-                else:
-                    os.mkdir(new_dir)
-                    loop = False
-
-            return new_dir
-
-        else:
-            os.mkdir(folder_dir)
-            return folder_dir
-    else:
-        if path.exists(folder_dir):
-            #print ('File already exists')
-            pass
-        else:
-            os.mkdir(folder_dir)
-            #print ('File created')
-        return folder_dir
 
 def type_int(arg):
     if (type(arg)) == int or (isinstance(arg, np.integer) == True):
@@ -855,6 +831,8 @@ class XL_WorkBook():
         # print(self.width_font_factor)
         self.height_font_factor = np.divide(21, 15) #This is only applicable for Arial font 16!!
 
+        self.__save_dir = os.path.join(os.environ['USERPROFILE'], "TMS_Saved_Reports")
+
         self.__height_cm_xlunit_ratio = np.divide(0.51, 14.4)
         self.__width_cm_xlunit_ratio = np.divide(1.65, 8)
         self.__xl_img_cm_tolerance = 0.15 #0.3 ### IMPORTANT! Tolerance value: 0.3cm, If Image covers a cell by 0.3cm, user can still view text(s) inside the cell.
@@ -1123,8 +1101,8 @@ class XL_WorkBook():
             raise Exception("The current Excel File does not have '{}' worksheet".format(sheet_name))
 
     def xl_save_workbook(self, file_path = None):
-        report_save_dir = os.path.join(os.environ['USERPROFILE'], "TMS_Saved_Reports")
-        report_folder = create_save_folder(folder_dir = report_save_dir)
+        
+        report_folder = create_save_folder(folder_dir = self.__save_dir)
         # print('file_path: ', file_path)
         if file_path is None:
             save_file, error_event = self.xl_file_save(report_folder, self.workbook, 'Report', '.xlsx')
@@ -1964,7 +1942,6 @@ class XL_WorkBook():
                 if data_type == 'image':
                     try:
                         img_obj = openpyxl.drawing.image.Image(data) #data can be a path to the img in string, or np.array img matrix
-
                     except Exception:# as e:
                         # print('Exception Error: ', e)
                         data = None

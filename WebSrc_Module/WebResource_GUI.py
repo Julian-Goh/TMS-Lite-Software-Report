@@ -2,59 +2,17 @@ import os
 from os import path
 
 import tkinter as tk
-from tkinter import ttk
 
 from Tk_MsgBox.custom_msgbox import Ask_Msgbox, Info_Msgbox, Error_Msgbox, Warning_Msgbox
+
+from misc_module.image_resize import img_resize_dim, opencv_img_resize, pil_img_resize, open_pil_img
+from misc_module.tk_img_module import *
 
 import subprocess
 
 from PIL import ImageTk, Image
 import numpy as np
 from functools import partial
-
-def _icon_load_resize(img_PATH, img_folder, img_file, img_scale = 0, img_width = 0, img_height = 0,
-    img_conv = None, pil_filter = Image.BILINEAR):
-    # pil_filter, Image.: NEAREST, BILINEAR, BICUBIC and ANTIALIAS
-    img = Image.open(img_PATH + "\\" + img_folder + "\\" + img_file)
-    if img_conv is not None:
-        try:
-            img = img.convert("RGBA")
-        except Exception:
-            pass
-    #print(img_file, img.mode)
-
-    if img_scale !=0 and (img_width == 0 and img_height == 0):
-        resize_w = round( np.multiply(img.size[0], img_scale) )
-        resize_h = round( np.multiply(img.size[1], img_scale) )
-
-        resize_img = img.resize((resize_w, resize_h), pil_filter)
-
-        img_tk = ImageTk.PhotoImage(resize_img)
-        return img_tk, img
-
-    if img_scale ==0 and (img_width != 0 and img_height != 0):
-        resize_img = img.resize((img_width, img_height), pil_filter)
-        img_tk = ImageTk.PhotoImage(resize_img)
-        return img_tk, img
-
-    else:
-        return None, img
-
-def impil_resize(impil, img_scale = 0, img_width = 0, img_height = 0, pil_filter = Image.BILINEAR):
-    # pil_filter, Image.: NEAREST, BILINEAR, BICUBIC and ANTIALIAS
-    if img_scale !=0:
-        resize_w = round( np.multiply(impil.size[0], img_scale) )
-        resize_h = round( np.multiply(impil.size[1], img_scale) )
-
-        resize_img = impil.resize((resize_w, resize_h), pil_filter)
-        return resize_img
-
-    elif img_scale ==0 and (img_width != 0 and img_height != 0):
-        resize_img = impil.resize((img_width, img_height), pil_filter)
-        return resize_img
-    else:
-        raise AttributeError("Please pass value(s) for 'img_scale' OR ('img_width' and 'img_height'). If 'img_scale' is not given"+ 
-            ", then resize process will use ('img_width' and 'img_height'). Otherwise, 'img_scale' is the defaulted priority.")
 
 class ResponsiveBtn(tk.Button):
     def __init__(self, master=None, **kwargs):
@@ -78,8 +36,12 @@ class WebResource_GUI(tk.Frame):
 
         self.curr_place_y = 10
 
-        _, self.math_theme_pil = _icon_load_resize(os.getcwd(), img_folder = "TMS Icon", img_file = "math_theme.png")
-        _, self.light_theme_pil = _icon_load_resize(os.getcwd(), img_folder = "TMS Icon", img_file = "light_bulb_theme(2).jpg")
+        self.math_theme_pil  = open_pil_img(os.getcwd(), img_folder = "TMS Icon", img_file = "math_theme.png")
+        self.light_theme_pil = open_pil_img(os.getcwd(), img_folder = "TMS Icon", img_file = "light_bulb_theme(2).jpg")
+
+        self.grid_columnconfigure(index = 0, weight = 1)
+        self.grid_rowconfigure(index = 0, weight = 1, uniform = 'default')
+        self.grid_rowconfigure(index = 1, weight = 1, uniform = 'default')
 
         self.resource_btn1 = ResponsiveBtn(self, relief = tk.GROOVE, font = 'Helvetica 34', image = pixel, compound = 'center'
             , text = 'Common\nImage\nEquation', justify = tk.CENTER
@@ -93,7 +55,8 @@ class WebResource_GUI(tk.Frame):
 
         self.resource_btn1['command'] = partial(self.open_web_resource, file_name = "TMS - R&D Library.pdf")
         self.resource_btn1.focus_set()
-        self.resource_btn1.place(x = 15, y = self.curr_place_y, relx = 0, rely = 0, relwidth = 1, width = -30 - 20, anchor = 'nw')
+        self.resource_btn1.grid(column = 0, row = 0, rowspan = 1, columnspan = 1, padx = (5,5), pady = (10,1), sticky = 'nswe')
+
         self.resource_btn1.update_idletasks()
 
         self.curr_place_y = self.curr_place_y + (self.resource_btn1.winfo_height() + 20)
@@ -111,7 +74,8 @@ class WebResource_GUI(tk.Frame):
 
         self.resource_btn2['command'] = partial(self.open_web_resource, file_name = "Lab-Ligthing-Penang-11.2.22(latest).pdf")
         self.resource_btn2.focus_set()
-        self.resource_btn2.place(x = 15, y = self.curr_place_y, relx = 0, rely = 0, relwidth = 1, width = -30 - 20, anchor = 'nw')
+        self.resource_btn2.grid(column = 0, row = 1, rowspan = 1, columnspan = 1, padx = (5,5), pady = (10,10), sticky = 'nswe')
+        
         self.resource_btn2.update_idletasks()
 
         self.curr_place_y = self.curr_place_y + (self.resource_btn2.winfo_height() + 20)
@@ -123,15 +87,15 @@ class WebResource_GUI(tk.Frame):
         tk_btn.focus_set()
 
     def btn_img_resize(self, event, tk_btn, pil_img):
-        pil_img = impil_resize(pil_img, img_width = tk_btn.winfo_width(), img_height = tk_btn.winfo_height(), pil_filter = Image.BILINEAR)
-        tk_img = ImageTk.PhotoImage(pil_img)
-        tk_btn['image'] = tk_img
-        tk_btn.image = tk_img
+        tk_img_insert(tk_btn, pil_img, img_width = event.width, img_height = event.height, pil_filter = Image.BILINEAR)
 
     def open_web_resource(self, file_name = "TMS - R&D Library.pdf"):
         err_flag = False
-        folder_path = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__))) + "\\TMS_Web_Resources"
-        
+        # folder_path = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__))) + "\\TMS_Web_Resources"
+        master_dir  = os.path.dirname(os.path.dirname(__file__))
+        # print(master_dir)
+        folder_path = master_dir + "\\TMS_Web_Resources"
+
         file_path = folder_path + "\\" + file_name
         
         if path.isfile(file_path) == True:
@@ -148,3 +112,4 @@ class WebResource_GUI(tk.Frame):
         if err_flag == True:
             Error_Msgbox(message = 'Corresponding File Does Not Exist!', title = 'Error Web Resource(s)'
                 , font = 'Helvetica 11', message_anchor = 'c')
+            

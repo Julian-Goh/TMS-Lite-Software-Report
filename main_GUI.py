@@ -2,44 +2,20 @@ import os
 from os import path
 
 import tkinter as tk
-from tkinter import ttk
-
-from Tk_MsgBox.custom_msgbox import Ask_Msgbox, Info_Msgbox, Error_Msgbox, Warning_Msgbox
 
 from PIL import ImageTk, Image
 import numpy as np
 import subprocess
 from functools import partial
 
-from image_resize import img_resize_dim, opencv_img_resize, pil_img_resize, pil_icon_resize
+from Tk_MsgBox.custom_msgbox import Ask_Msgbox, Info_Msgbox, Error_Msgbox, Warning_Msgbox
+from Tk_Custom_Widget.ScrolledCanvas import ScrolledCanvas
 
-from ScrolledCanvas import ScrolledCanvas
-
-from Report_GUI import Report_GUI
-from WebResource_GUI import WebResource_GUI
-
-from tool_tip import CreateToolTip
-
-def open_web_resource(file_name = "\\TMS - R&D Library.pdf"):
-    err_flag = False
-    folder_path = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__))) + "\\TMS_Web_Resources"
-    
-    file_path = folder_path + "\\" + file_name
-    
-    if path.isfile(file_path) == True:
-        err_flag = False
-        
-        proc_obj = subprocess.Popen(['explorer', file_path]
-            , stdout = subprocess.PIPE ## To show output values
-            , stderr = subprocess.STDOUT ## To hide err values
-            )
-
-    elif path.isfile(file_path) == False:
-        err_flag = True
-
-    if err_flag == True:
-        Error_Msgbox(message = 'Corresponding File Does Not Exist!', title = 'Error Web Resource(s)'
-            , font = 'Helvetica 11', message_anchor = 'c')
+from misc_module.image_resize import img_resize_dim, opencv_img_resize, pil_img_resize, open_pil_img
+from misc_module.tk_img_module import *
+from misc_module.tool_tip import CreateToolTip
+from Report_Module.Report_GUI import Report_GUI
+from WebSrc_Module.WebResource_GUI import WebResource_GUI
 
 def widget_enable(*widgets):
     for widget in widgets:
@@ -62,116 +38,121 @@ class main_GUI():
         self.master = master
         self.img_PATH = os.getcwd()
         self.load_TMS_logo()
-        self.load_icon_img()
+        self.load_icon_src()
 
         self.top_frame = tk.Frame(master = self.master, bg = 'midnight blue'
-            , highlightbackground = 'midnight blue', highlightthickness = 1) # width = 1080, height = 85
+            , highlightbackground = 'midnight blue')
         self.top_frame['height'] = 85
-        self.top_frame.place(relwidth = 1, relx = 0, rely =0)
+        self.top_frame.place(x = 0, y = 0
+            , relwidth = 1, width = self.top_frame['width']
+            , height = self.top_frame['height'], anchor = 'nw')
+        self.top_frame.grid_rowconfigure(index = 0, weight = 1)
+        self.top_frame.grid_rowconfigure(index = 1, weight = 1)
+        self.top_frame.grid_columnconfigure(index = 3, weight = 1)
 
-        tk.Label(self.top_frame, image = self.tms_logo, bg = 'white').place(x=0, y=0)
+        tk_lb = tk.Label(self.top_frame, bg = 'white')
+        tk_img_insert(tk_lb, self.tms_logo, img_width = 130
+                            , img_height = 79
+                            , pil_filter = Image.ANTIALIAS)
 
-        self.icon_frame = tk.Frame(master = self.master, bg = 'blue'
-            , highlightbackground = 'blue', highlightthickness = 0) #width = 44, height = 555
-        self.icon_frame_W = 33 #44
-        self.icon_frame['width'] = self.icon_frame_W
-        self.icon_frame.place(relheight = 1, x = 0, y = 85, height = -85)
+        tk_lb.grid(row = 0, column = 0, rowspan = 2, ipady = 1, ipadx = 1, sticky = 'nwse')
 
-        self.report_main_fr = ScrolledCanvas(master = self.master, frame_w = 970, frame_h = master.winfo_height() - 85, 
-            canvas_x = self.icon_frame_W, canvas_y = 85, window_bg = 'white', canvas_highlightthickness = 0
-            , hbar_x = self.icon_frame_W)
-        self.report_main_fr.scrolly.place_forget()
+        self.menu_frame = tk.Frame(master = self.master, bg = 'blue'
+            , highlightbackground = 'blue') #width = 44, height = 555
+        self.menu_frame_w = 33 #44
+        self.menu_frame['width'] = self.menu_frame_w
+        self.menu_frame.place(x = 0, y = 85, relheight = 1, height = -85, anchor = 'nw')
 
-        self.resource_main_fr = ScrolledCanvas(master = self.master, frame_w = self.master.winfo_width()-self.icon_frame_W, frame_h = self.master.winfo_height()-85, 
-            canvas_x = self.icon_frame_W, canvas_y = 85, window_bg = 'white', canvas_highlightthickness = 0
-            , hbar_x = self.icon_frame_W)
+        self.report_main_fr = ScrolledCanvas(master = self.master, frame_w = 970, frame_h = master.winfo_height() - 85
+            , canvas_x = self.menu_frame_w, canvas_y = 85, bg = 'white'
+            , hbar_x = self.menu_frame_w)
+
+        self.resource_main_fr = ScrolledCanvas(master = self.master, frame_w = self.master.winfo_width()-self.menu_frame_w, frame_h = self.master.winfo_height()-85, 
+            canvas_x = self.menu_frame_w, canvas_y = 85, bg = 'white'
+            , hbar_x = self.menu_frame_w)
 
         self.__subframe_list = [self.report_main_fr
                                 , self.resource_main_fr]
 
         main_GUI.class_report_gui = Report_GUI(self.report_main_fr.window_fr, scroll_canvas_class = self.report_main_fr
-            , toggle_ON_btn_img = self.toggle_ON_button_img
-            , toggle_OFF_btn_img = self.toggle_OFF_button_img
-            , save_impil = self.save_impil
-            , close_impil = self.close_impil
-            , up_arrow_icon = self.up_arrow_icon
-            , down_arrow_icon = self.down_arrow_icon
-            , refresh_impil = self.refresh_impil
-            , text_icon = self.text_icon
-            , folder_impil = self.folder_impil
-            , window_icon = self.window_icon)
+            , gui_graphic = dict( toggle_ON_btn_img = self.toggle_on_icon, toggle_OFF_btn_img = self.toggle_off_icon
+                                , save_icon = self.save_icon, close_icon = self.close_icon
+                                , up_arrow_icon = self.up_arrow_icon, down_arrow_icon = self.down_arrow_icon
+                                , refresh_icon = self.refresh_icon
+                                , text_icon = self.text_icon
+                                , window_icon = self.window_icon
+                                , folder_icon = self.folder_icon
+                                , reset_icon = self.reset_icon
+                                , clipboard_icon = self.report_b_icon 
+                                )
+            )
         main_GUI.class_report_gui.place(relwidth = 1, relheight =1, x=0,y=0)
-
-
         self.class_resource_gui = WebResource_GUI(self.resource_main_fr.window_fr, scroll_canvas_class = self.resource_main_fr)
         self.class_resource_gui.place(x = 0, y = 0, relx = 0, rely = 0, relwidth = 1, relheight = 1)
 
-        self.report_ctrl_btn = tk.Button(self.icon_frame, relief = tk.GROOVE, activebackground = 'navy', bg = 'royal blue', image=self.report_icon)
+        self.report_ctrl_btn    = tk.Button(self.menu_frame, relief = tk.GROOVE, activebackground = 'navy', bg = 'royal blue')
+        self.web_resource_btn   = tk.Button(self.menu_frame, relief = tk.GROOVE, activebackground = 'navy', bg = 'royal blue')
 
-        self.web_resource_btn = tk.Button(self.icon_frame, relief = tk.GROOVE, activebackground = 'navy', bg = 'royal blue', image=self.web_resource_icon)
-        
-        self.__ctrl_btn_list = [self.report_ctrl_btn
-                                , self.web_resource_btn]
+        tk_img_insert(self.report_ctrl_btn   , self.report_icon   , img_width = 26, img_height = 26)
+        tk_img_insert(self.web_resource_btn  , self.web_icon      , img_width = 26, img_height = 26)
 
-        self.report_ctrl_btn['command'] = self.report_ctrl_btn_state
-        self.web_resource_btn['command'] = self.resource_btn_state #open_web_resource
+
+        self.__ctrl_btn_dict = {}
+        hmap = self.__ctrl_btn_dict
+        hmap[self.report_ctrl_btn]      = self.report_ctrl_btn_state
+        hmap[self.web_resource_btn]     = self.resource_btn_state
 
         CreateToolTip(self.report_ctrl_btn, 'Report Generation'
             , 32, -5, font = 'Tahoma 11')
         CreateToolTip(self.web_resource_btn, 'Additional Resources'
             , 32, -5, font = 'Tahoma 11')
 
-        self.report_ctrl_btn.place(x= 0, y = 0)
-        self.web_resource_btn.place(x= 0, y = 31)
+        self.report_ctrl_btn.grid(row = 0, column = 0, columnspan = 1, ipadx = 1, ipady = 1, sticky = 'nwse')
+        self.web_resource_btn.grid(row = 1, column = 0, columnspan = 1, ipadx = 1, ipady = 1, sticky = 'nwse')
 
         self.report_ctrl_btn_state()
 
-
     def load_TMS_logo(self):
-        ### pil_filter, Image.: NEAREST, BILINEAR, BICUBIC and ANTIALIAS
-        self.tms_logo, _ = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "Logo.png"
-            , img_width = 130
-            , img_height = 79
-            , pil_filter = Image.ANTIALIAS)
+        self.tms_logo = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "Logo.png")
 
-    def load_icon_img(self):
-        self.report_icon, _ = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "clipboard (1).png", img_width = 26, img_height =26)
-        self.web_resource_icon, _ = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "web_resource.png", img_width = 26, img_height =26)
+    def load_icon_src(self):
+        self.report_icon     = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "clipboard (1).png")
+        self.report_b_icon   = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "clipboard_black(1).png")
+        self.web_icon        = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "web_resource.png")
+        self.save_icon       = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "diskette.png")
+        self.refresh_icon    = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "right.png")
+        self.reset_icon      = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "reset.png")
+        self.close_icon      = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "close.png")
+        self.up_arrow_icon   = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "up_arrow.png")
+        self.down_arrow_icon = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "down_arrow.png")
+        self.text_icon       = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "text_icon.png")
+        self.folder_icon     = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "folder.png")
+        self.toggle_on_icon  = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "on icon.png")
+        self.toggle_off_icon = open_pil_img(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "off icon.png")
 
-        _, self.save_impil = pil_icon_resize(img_PATH = os.getcwd(), img_folder = "TMS Icon", img_file = "diskette.png", img_scale = 0.035)
-
-        _, self.refresh_impil = pil_icon_resize(img_PATH = os.getcwd(), img_folder = "TMS Icon", img_file = "right.png", img_width = 18, img_height =18)
-
-        _, self.close_impil = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "close.png", img_width = 20, img_height =20)
-
-        self.up_arrow_icon, _ = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "up_arrow.png", img_width = 20, img_height =20)
-        self.down_arrow_icon, _ = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "down_arrow.png", img_width = 20, img_height =20)
-
-        self.text_icon, _ = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "text_icon.png", img_width = 20, img_height =20)
-
-        _, self.folder_impil = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "folder.png", img_width = 20, img_height =20)
-        
-        self.toggle_ON_button_img, _ = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "on icon.png", img_scale = 0.06)
-        self.toggle_OFF_button_img, _ = pil_icon_resize(img_PATH = self.img_PATH, img_folder = "TMS Icon", img_file = "off icon.png", img_scale = 0.06)
+    def __dummy_event(self, event):
+        return "break"
 
     def ctrl_btn_state_func(self, target_btn):
-        for ctrl_btn in self.__ctrl_btn_list:
+        for ctrl_btn, btn_command in self.__ctrl_btn_dict.items():
             if ctrl_btn == target_btn:
-                widget_disable(ctrl_btn)
+                ctrl_btn['command'] = partial(self.__dummy_event, event = None)
+                ctrl_btn['bg'] = 'navy'
             else:
-                widget_enable(ctrl_btn)
+                ctrl_btn['command'] = btn_command
+                ctrl_btn['bg'] = 'royal blue'
 
     def show_subframe_func(self, target_frame, target_place = True, *args, **kwargs):
         for tk_frame in self.__subframe_list:
             if (isinstance(tk_frame, ScrolledCanvas)) == True:
                 if tk_frame == target_frame:
                     if target_place == True:
-                        tk_frame.rmb_all_func(*args, **kwargs)
+                        tk_frame.show(*args, **kwargs)
                     elif target_place == False:
-                        tk_frame.forget_all_func()
+                        tk_frame.hide()
 
                 else:
-                    tk_frame.forget_all_func()
+                    tk_frame.hide()
 
             elif (isinstance(tk_frame, tk.Frame)) == True:
                 if tk_frame == target_frame:
@@ -201,10 +182,4 @@ class main_GUI():
     def close_all(self):
         ask_msgbox = Ask_Msgbox('Do you want to quit?', title = 'Quit', parent = self.master, message_anchor = 'w')
         if ask_msgbox.ask_result() == True:
-            for widget in self.master.winfo_children(): # Loop through each widget in main window
-                if isinstance(widget, tk.Toplevel): # If widget is an instance of toplevel
-                    try:
-                        widget.destroy()
-                    except (tk.TclError):
-                        pass
             self.master.destroy()
