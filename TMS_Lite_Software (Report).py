@@ -57,7 +57,7 @@ if __name__ == '__main__':
     '''
 
     tk_root = Root_Window()
-    tk_root.title('TMS-Lite Software (Report) v.1.1.0')
+    tk_root.title('TMS-Lite Software (Report) v.1.2.0')
 
     tk_root.resizable(True, True)
     window_icon = ImageTk.PhotoImage(file = os.getcwd() + '\\TMS Icon\\' + 'logo4.ico')
