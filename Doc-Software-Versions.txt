@@ -26,3 +26,11 @@ Update 1.1.0
 Update 1.1.1
 1. Added button for user to open save folder (TMS_Saved_Reports) directly from the software.
 2. Changes and update to the ‘New Report’ button in Report Tool. Feedback request: To provide user the option to clear all existing data on the UI to start a New Report.
+
+Update 1.2.0
+1. Added a feature to allow user to load .csv file into the Report GUI to display all relevant details
+2. Added a clear all button to clear all unsaved report details
+3. Updated & improve error handling event. Previously, when software has an error, the software is stuck at loading screen. 
+The improvement also allows user to identify the source of error in the event logs.
+4. Minor bug fixes.
+5. Changes & updates to Python packages & modules for easier code maintenance.
