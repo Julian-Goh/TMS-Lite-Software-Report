@@ -21,6 +21,7 @@ import cv2
 
 import numpy as np
 from functools import partial
+import traceback
 
 import io
 import openpyxl
@@ -252,7 +253,6 @@ class Report_GUI(tk.Frame):
 
         self.err_msgbox_handle_3 = None #Exception Error in the Algorithm
         self.err_msgbox_flag_3 = False
-        self.__exception_msg = ''
 
         self.info_msgbox_handle = None
         self.info_msgbox_flag = False
@@ -2095,7 +2095,7 @@ class Report_GUI(tk.Frame):
             imtext_memory_arr[i] = [] ###array containg image text or descriptions from the excel report when user load excel report.
 
         ### Extracting image(s) from excel and inserting it into respective img_dictionary(ies)
-        print(xl_imloader._images.items(), start_id_arr)
+        # print(xl_imloader._images.items(), start_id_arr)
         for cell_id, img_obj in xl_imloader._images.items():
             col_char = re.split('(\\d+)',cell_id)[0]
             if col_char == 'A':
@@ -2672,9 +2672,16 @@ class Report_GUI(tk.Frame):
 
         try:
             event_input_err, report_data_list = self.insert_report_data()
-        except Exception as e:
+        except Exception: ### Capture Exception if there are any error occuring in the module, python imports
+            err_msg = (   "-----------------------------------Exception Error--------------------------------------\n"
+                        + "{}: ".format(datetime.now().strftime("(%d-%m-%Y, %H:%M:%S) "))
+                        + "{}\n".format(traceback.format_exc())
+                        + "-----------------------------------Exception Error--------------------------------------\n\n")
+            self.event_log_txtbox.insert_readonly("0.0"
+                , err_msg)
+            del err_msg
+
             self.thread_event.clear()
-            self.__exception_msg = str(e)
             self.err_msgbox_flag_3 = True
             self.clear_info_msgbox()
             self.clear_error_msgbox_1()
@@ -2684,10 +2691,10 @@ class Report_GUI(tk.Frame):
 
             widget_enable(self.update_report_btn, self.generate_report_btn, self.update_report_checkbtn
                 , self.worksheet_name_entry
-                , self.rename_worksheet_btn, self.create_worksheet_checkbtn
-                , self.reload_worksheet_btn)
+                , self.rename_worksheet_btn, self.create_worksheet_checkbtn)
             self.xl_class.xl_close_workbook()
             if self.xl_load_path is not None:
+                widget_enable(self.reload_worksheet_btn)
                 self.xl_class.xl_open_workbook(self.xl_load_path)
             
             return
@@ -2860,9 +2867,16 @@ class Report_GUI(tk.Frame):
 
             try:
                 event_input_err, report_data_list = self.insert_report_data()
-            except Exception as e:
+            except Exception:
+                err_msg = (   "-----------------------------------Exception Error--------------------------------------\n"
+                            + "{}: ".format(datetime.now().strftime("(%d-%m-%Y, %H:%M:%S) "))
+                            + "{}\n".format(traceback.format_exc())
+                            + "-----------------------------------Exception Error--------------------------------------\n\n")
+                self.event_log_txtbox.insert_readonly("0.0"
+                    , err_msg)
+                del err_msg
+
                 self.thread_event.clear()
-                self.__exception_msg = str(e)
                 self.err_msgbox_flag_3 = True
                 self.clear_info_msgbox()
                 self.clear_error_msgbox_1()
@@ -2872,8 +2886,9 @@ class Report_GUI(tk.Frame):
 
                 widget_enable(self.update_report_btn, self.generate_report_btn, self.update_report_checkbtn
                     , self.worksheet_name_entry
-                    , self.rename_worksheet_btn, self.create_worksheet_checkbtn
-                    , self.reload_worksheet_btn)
+                    , self.rename_worksheet_btn, self.create_worksheet_checkbtn)
+                widget_enable(self.reload_worksheet_btn)
+                
                 self.xl_class.xl_close_workbook()
                 if self.xl_load_path is not None:
                     self.xl_class.xl_open_workbook(self.xl_load_path)
@@ -3045,9 +3060,9 @@ class Report_GUI(tk.Frame):
             self.clear_error_msgbox_3()
             # Error_Msgbox(message = "Save Error!\nReport File is Currently Opened in Microsoft Excel!\nPlease close Microsoft Excel and try again.", title = 'Error'
             #         , message_anchor = 'w', width = 370)
-            Error_Msgbox(message = "Exception Found During Report Generation!\n\n"
-                + "Error: {}".format(self.__exception_msg), title = 'Exception Error'
-                    , message_anchor = 'w', width = 370, height = 200)
+            Error_Msgbox(message = "Exception Error during Report Generation!\n\n"
+                + "Please refer to the Event Logs for Details!", title = 'Exception Error'
+                    , message_anchor = 'w', height = 180)
 
     def clear_error_msgbox_3(self):
         if self.err_msgbox_handle_3 is not None:
